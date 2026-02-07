@@ -27,18 +27,16 @@
   },
   "dependencies": {
     "@elizaos/core": "next",
+    "@iqlabs-official/solana-sdk": "^0.1.0",
     "@solana/web3.js": "^1.95.5",
     "bs58": "^6.0.0",
     "nanoid": "^5.0.7"
   },
-  "optionalDependencies": {
-    "iqlabs-sdk": "*"
-  },
   "devDependencies": {
     "@types/node": "^22.10.5",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.2"
   },
-  "peerDependencies": {},
   "agentConfig": {
     "pluginType": "elizaos:plugin:1.0.0",
     "pluginParameters": {
@@ -52,7 +50,7 @@
         "type": "string",
         "description": "Solana RPC endpoint URL",
         "required": false,
-        "default": "https://api.devnet.solana.com"
+        "default": "https://api.mainnet-beta.solana.com"
       },
       "IQ_AGENT_NAME": {
         "type": "string",
@@ -76,7 +74,7 @@
         "description": "Moltbook API token for social features (posting, commenting)",
         "required": false,
         "sensitive": true
-      },
+      }
     }
   },
   "keywords": [

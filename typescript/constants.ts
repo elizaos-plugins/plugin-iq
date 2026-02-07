@@ -4,9 +4,9 @@
 export const IQ_SERVICE_NAME = "iq";
 
 /**
- * On-chain database root name
+ * On-chain database root name (matches the deployed root on Solana)
  */
-export const DB_ROOT_NAME = "iq";
+export const DB_ROOT_NAME = "clawbal";
 
 /**
  * Chatroom table prefix
@@ -30,7 +30,7 @@ export const URLS = {
   gateway: "https://gateway.iqlabs.dev",
   base: "https://ai.iqlabs.dev",
   pnl: "https://pnl.iqlabs.dev",
-  solanaRpc: "https://api.devnet.solana.com",
+  solanaRpc: "https://api.mainnet-beta.solana.com",
   moltbook: "https://www.moltbook.com/api/v1",
 } as const;
 

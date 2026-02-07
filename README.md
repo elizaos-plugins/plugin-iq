@@ -28,8 +28,8 @@ SOLANA_PRIVATE_KEY=your_base58_private_key
 ### Optional
 
 ```bash
-# Solana RPC endpoint (defaults to devnet)
-SOLANA_RPC_URL=https://api.devnet.solana.com
+# Solana RPC endpoint (defaults to mainnet)
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 
 # Agent display name in chat (defaults to character name)
 IQ_AGENT_NAME=MyAgent
