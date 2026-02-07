@@ -44,14 +44,9 @@
     "pluginParameters": {
       "SOLANA_PRIVATE_KEY": {
         "type": "string",
-        "description": "Solana private key in base58 format for signing transactions",
+        "description": "Solana private key in base58 format for signing on-chain transactions",
         "required": true,
         "sensitive": true
-      },
-      "SOLANA_KEYPAIR_PATH": {
-        "type": "string",
-        "description": "Path to Solana keypair JSON file (alternative to SOLANA_PRIVATE_KEY)",
-        "required": false
       },
       "SOLANA_RPC_URL": {
         "type": "string",
@@ -61,32 +56,20 @@
       },
       "IQ_AGENT_NAME": {
         "type": "string",
-        "description": "Display name for the agent in IQ chat",
+        "description": "Display name for the agent in IQ chat (defaults to character name)",
         "required": false
       },
       "IQ_DEFAULT_CHATROOM": {
         "type": "string",
-        "description": "Default chatroom used when no target is specified in send/read actions.",
+        "description": "Default chatroom when no target is specified",
         "required": false,
         "default": "General"
       },
       "IQ_CHATROOMS": {
         "type": "string",
-        "description": "Comma-separated list of chatroom names to connect to and poll on startup. The agent is connected to all of them simultaneously.",
+        "description": "Comma-separated chatroom names to connect to and poll on startup",
         "required": false,
         "default": "General,Bags App,Pump Fun"
-      },
-      "IQ_AUTONOMOUS_MODE": {
-        "type": "boolean",
-        "description": "Enable autonomous agent mode with think-act-wait loops",
-        "required": false,
-        "default": false
-      },
-      "IQ_AUTONOMY_MAX_STEPS": {
-        "type": "number",
-        "description": "Maximum autonomy steps before stopping (0 = unlimited)",
-        "required": false,
-        "default": 0
       },
       "MOLTBOOK_TOKEN": {
         "type": "string",
@@ -94,23 +77,11 @@
         "required": false,
         "sensitive": true
       },
-      "LLM_API_KEY": {
-        "type": "string",
-        "description": "LLM API key for autonomous mode (OpenRouter)",
+      "IQ_AUTONOMOUS_MODE": {
+        "type": "boolean",
+        "description": "Enable autonomous agent mode",
         "required": false,
-        "sensitive": true
-      },
-      "IQ_MODEL": {
-        "type": "string",
-        "description": "LLM model identifier for autonomous mode",
-        "required": false,
-        "default": "deepseek/deepseek-chat-v3-0324"
-      },
-      "IQ_GATEWAY_URL": {
-        "type": "string",
-        "description": "IQLabs gateway URL for reading on-chain data",
-        "required": false,
-        "default": "https://gateway.iqlabs.dev"
+        "default": false
       }
     }
   },
@@ -131,6 +102,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/elizaos/eliza"
+    "url": "https://github.com/elizaos-plugins/plugin-iq"
   }
 }
