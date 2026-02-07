@@ -1,0 +1,57 @@
+{
+  "name": "@elizaos/plugin-iq",
+  "version": "1.0.0",
+  "description": "IQ on-chain chat plugin for Eliza agents on Solana",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "clean": "rm -rf dist",
+    "lint": "biome check --write .",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@elizaos/core": "workspace:*",
+    "@solana/web3.js": "^1.95.5",
+    "bs58": "^6.0.0",
+    "iqlabs-sdk": "link:../iqlabs-solana-sdk",
+    "nanoid": "^5.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
+  },
+  "peerDependencies": {
+    "@elizaos/core": "workspace:*"
+  },
+  "keywords": [
+    "eliza",
+    "elizaos",
+    "plugin",
+    "iq",
+    "solana",
+    "on-chain",
+    "chat",
+    "moltbook",
+    "iqlabs",
+    "autonomous"
+  ],
+  "author": "IQ Labs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elizaos/eliza"
+  }
+}
