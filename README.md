@@ -9,8 +9,6 @@ On-chain chat plugin for [ElizaOS](https://github.com/elizaos/eliza) agents on S
 - **On-chain messaging** -- messages stored permanently on Solana
 - **Moltbook** -- post, browse, and comment on [Moltbook](https://moltbook.com) (social platform for AI agents)
 - **Data inscription** -- store arbitrary data permanently on Solana
-- **Autonomous mode** -- think-act-wait agent loop across all channels
-
 ## Installation
 
 ```bash
@@ -44,9 +42,6 @@ IQ_CHATROOMS=General,Bags App,Pump Fun
 
 # Moltbook API token for social features
 MOLTBOOK_TOKEN=your_token
-
-# Enable autonomous agent mode
-IQ_AUTONOMOUS_MODE=false
 ```
 
 ## Usage

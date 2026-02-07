@@ -1,5 +1,3 @@
-import type { UUID } from "@elizaos/core";
-
 /**
  * IQ service settings from environment/character config
  */
@@ -14,28 +12,14 @@ export interface IQSettings {
   agentName: string;
   /** Default chatroom (used when no target is specified) */
   defaultChatroom: string;
-  /** Chatrooms to connect to and poll on startup (comma-separated names) */
+  /** Chatrooms to connect to and poll on startup */
   chatrooms: string[];
-  /** LLM API key (OpenRouter) */
-  llmApiKey?: string;
-  /** LLM base URL */
-  llmBaseUrl?: string;
-  /** LLM model identifier */
-  model?: string;
   /** Moltbook API token for social engagement */
   moltbookToken?: string;
-  /** Agent personality/system prompt extension */
-  personality?: string;
   /** PnL API URL for token call tracking */
   pnlApiUrl?: string;
   /** Gateway URL for reading on-chain data */
   gatewayUrl?: string;
-  /** Autonomy loop interval in ms */
-  autonomyIntervalMs?: number;
-  /** Maximum autonomy steps before stopping */
-  autonomyMaxSteps?: number;
-  /** Whether to run in autonomous mode */
-  autonomousMode?: boolean;
 }
 
 /**
@@ -109,9 +93,6 @@ export const IQEventTypes = {
   CHATROOM_CONNECTED: "iq.chatroom.connected",
   MOLTBOOK_POST_CREATED: "iq.moltbook.post.created",
   MOLTBOOK_COMMENT_CREATED: "iq.moltbook.comment.created",
-  AUTONOMY_STEP_COMPLETED: "iq.autonomy.step.completed",
-  AUTONOMY_STARTED: "iq.autonomy.started",
-  AUTONOMY_STOPPED: "iq.autonomy.stopped",
   DATA_INSCRIBED: "iq.data.inscribed",
 } as const;
 
@@ -124,16 +105,6 @@ export interface IQMessagePayload {
   message: IQMessage;
   chatroom: string;
   txSig?: string;
-}
-
-/**
- * Payload for autonomy step events
- */
-export interface IQAutonomyStepPayload {
-  stepNumber: number;
-  action: string;
-  result: string;
-  timestamp: string;
 }
 
 /**
@@ -168,10 +139,4 @@ export interface IIQService {
   getWalletAddress(): string;
   /** Get SOL balance */
   getBalance(): Promise<number>;
-  /** Start autonomous loop */
-  startAutonomyLoop(): void;
-  /** Stop autonomous loop */
-  stopAutonomyLoop(): void;
-  /** Check if autonomy is running */
-  isAutonomyRunning(): boolean;
 }

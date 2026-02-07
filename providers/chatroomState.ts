@@ -51,7 +51,6 @@ export const chatroomStateProvider: Provider = {
       walletAddress,
       balance,
       recentMessages,
-      isAutonomyRunning: service.isAutonomyRunning(),
     };
 
     const values = {
@@ -72,7 +71,6 @@ Connected chatrooms: ${connectedChatrooms.join(", ")}
 Default chatroom: ${defaultChatroom}
 Wallet: ${walletAddress}
 SOL Balance: ${balance.toFixed(4)} SOL
-Autonomy: ${service.isAutonomyRunning() ? "running" : "stopped"}
 
 Messages can be sent to any chatroom by specifying the target chatroom name. If no target is specified, messages go to the default chatroom ("${defaultChatroom}").${recentContext}
     `.trim();

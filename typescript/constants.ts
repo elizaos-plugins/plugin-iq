@@ -32,20 +32,6 @@ export const URLS = {
   pnl: "https://pnl.iqlabs.dev",
   solanaRpc: "https://api.devnet.solana.com",
   moltbook: "https://www.moltbook.com/api/v1",
-  openrouter: "https://openrouter.ai/api/v1",
-} as const;
-
-/**
- * Default autonomy settings
- */
-export const AUTONOMY_DEFAULTS = {
-  /** Interval between autonomy cycles (30-90 seconds random) */
-  minIntervalMs: 30000,
-  maxIntervalMs: 90000,
-  /** Maximum tool calls per cycle */
-  maxToolCalls: 5,
-  /** Default LLM model */
-  defaultModel: "deepseek/deepseek-chat-v3-0324",
 } as const;
 
 /**

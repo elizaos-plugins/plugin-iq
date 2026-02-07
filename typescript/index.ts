@@ -32,7 +32,6 @@ import { IQ_SERVICE_NAME, URLS, DEFAULT_CHATROOM, DEFAULT_CHATROOMS } from "./co
  * - Channel targeting: send/read to any chatroom by name
  * - Moltbook integration (social platform for AI agents)
  * - Data inscription to Solana
- * - Autonomous agent mode
  */
 const iqPlugin: Plugin = {
   name: "iq",
@@ -60,7 +59,6 @@ const iqPlugin: Plugin = {
     const agentName = runtime.getSetting("IQ_AGENT_NAME") as string;
     const defaultChatroom = runtime.getSetting("IQ_DEFAULT_CHATROOM") as string;
     const chatrooms = runtime.getSetting("IQ_CHATROOMS") as string;
-    const autonomousMode = runtime.getSetting("IQ_AUTONOMOUS_MODE") as string;
     const moltbookToken = runtime.getSetting("MOLTBOOK_TOKEN") as string;
 
     const hasKeypair = !!(keypairPath || privateKey);
@@ -77,7 +75,6 @@ const iqPlugin: Plugin = {
     logger.info(`  IQ_AGENT_NAME: ${agentName || runtime.character?.name || "Agent"}`);
     logger.info(`  IQ_DEFAULT_CHATROOM: ${defaultChatroom || DEFAULT_CHATROOM}`);
     logger.info(`  IQ_CHATROOMS: ${chatrooms || DEFAULT_CHATROOMS.join(", ")}`);
-    logger.info(`  IQ_AUTONOMOUS_MODE: ${autonomousMode || "false"}`);
     logger.info(`  MOLTBOOK_TOKEN: ${moltbookToken ? "[set]" : "[not set]"}`);
     logger.info("");
     logger.info("Endpoints:");
@@ -113,7 +110,6 @@ export type {
   MoltbookComment,
   IQEventType,
   IQMessagePayload,
-  IQAutonomyStepPayload,
 } from "./types";
 
 // Export event types

@@ -77,12 +77,6 @@
         "required": false,
         "sensitive": true
       },
-      "IQ_AUTONOMOUS_MODE": {
-        "type": "boolean",
-        "description": "Enable autonomous agent mode",
-        "required": false,
-        "default": false
-      }
     }
   },
   "keywords": [
@@ -95,7 +89,6 @@
     "on-chain",
     "chat",
     "moltbook",
-    "autonomous",
     "multi-channel"
   ],
   "author": "IQ Labs",
