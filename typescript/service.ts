@@ -18,7 +18,7 @@ import bs58 from "bs58";
 import iqlabs from "@iqlabs-official/solana-sdk";
 
 import { IQ_SERVICE_NAME, DB_ROOT_NAME, CHATROOM_PREFIX, URLS, MESSAGE_LIMITS } from "./constants";
-import { getIQSettings, validateIQSettings } from "./environment";
+import { getIQSettings } from "./environment";
 import {
   type IQSettings,
   type IQMessage,
@@ -40,8 +40,11 @@ function sha256(s: string): Uint8Array {
  * IQService - On-chain chat service for the IQ network
  *
  * Connects to ALL configured chatrooms simultaneously (like Discord channels).
- * Messages are targeted to specific chatrooms - no need to "switch" between them.
+ * Messages are targeted to specific chatrooms by name.
  * Each chatroom maps to a separate on-chain Solana table.
+ *
+ * If no Solana wallet is configured, the service will not start.
+ * Providers detect this and inform the agent to configure SOLANA_PRIVATE_KEY.
  */
 export class IQService extends Service implements IIQService {
   static serviceType: string = IQ_SERVICE_NAME;
@@ -71,25 +74,29 @@ export class IQService extends Service implements IIQService {
   }
 
   /**
-   * Static factory method to create and initialize the service
+   * Static factory method. If wallet is not configured, logs a warning
+   * and throws so the service doesn't register (providers handle the UX).
    */
   static async start(runtime: IAgentRuntime): Promise<IQService> {
     const service = new IQService(runtime);
+
+    // Check for wallet before attempting init
+    if (!service.settings.privateKey && !service.settings.keypairPath) {
+      runtime.logger.warn(
+        "IQ chat not available - no Solana wallet configured. Set SOLANA_PRIVATE_KEY to enable on-chain chat."
+      );
+      throw new Error("IQ service requires SOLANA_PRIVATE_KEY to be configured");
+    }
+
     await service.initialize();
     return service;
   }
 
   /**
-   * Initialize the IQ service
+   * Initialize the IQ service (only called when wallet is present)
    */
   private async initialize(): Promise<void> {
     this.runtime.logger.info("IQService.initialize() called");
-
-    const validation = validateIQSettings(this.settings);
-    if (!validation.valid) {
-      this.runtime.logger.warn(`IQ service not starting: ${validation.errors.join(", ")}`);
-      throw new Error(`IQ service validation failed: ${validation.errors.join(", ")}`);
-    }
 
     try {
       // Configure SDK RPC URL for the reader
@@ -100,14 +107,9 @@ export class IQService extends Service implements IIQService {
 
       // Load keypair
       if (this.settings.privateKey) {
-        try {
-          const secretKey = bs58.decode(this.settings.privateKey);
-          this.keypair = Keypair.fromSecretKey(secretKey);
-          this.runtime.logger.info("Loaded keypair from SOLANA_PRIVATE_KEY");
-        } catch (e) {
-          this.runtime.logger.error(`Invalid SOLANA_PRIVATE_KEY format: ${e}`);
-          throw new Error(`Invalid SOLANA_PRIVATE_KEY format: ${e}`);
-        }
+        const secretKey = bs58.decode(this.settings.privateKey);
+        this.keypair = Keypair.fromSecretKey(secretKey);
+        this.runtime.logger.info("Loaded keypair from SOLANA_PRIVATE_KEY");
       } else if (this.settings.keypairPath) {
         const keypairPath = this.settings.keypairPath.replace("~", process.env.HOME || "");
         if (!fs.existsSync(keypairPath)) {
@@ -116,8 +118,6 @@ export class IQService extends Service implements IIQService {
         const keypairData = JSON.parse(fs.readFileSync(keypairPath, "utf8"));
         this.keypair = Keypair.fromSecretKey(Uint8Array.from(keypairData));
         this.runtime.logger.info(`Loaded keypair from ${keypairPath}`);
-      } else {
-        throw new Error("No keypair configured");
       }
 
       // Initialize on-chain configuration
@@ -159,6 +159,7 @@ export class IQService extends Service implements IIQService {
       this.startMessagePolling();
     } catch (error) {
       this.runtime.logger.error(`Failed to start IQ service: ${error}`);
+      throw error;
     }
   }
 

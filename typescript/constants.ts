@@ -16,12 +16,12 @@ export const CHATROOM_PREFIX = "chatroom:";
 /**
  * Default chatroom (when no target specified)
  */
-export const DEFAULT_CHATROOM = "General";
+export const DEFAULT_CHATROOM = "clawbal";
 
 /**
  * Default chatrooms to connect to and poll on startup
  */
-export const DEFAULT_CHATROOMS = ["General", "Bags App", "Pump Fun"];
+export const DEFAULT_CHATROOMS = ["clawbal", "milaidy"];
 
 /**
  * External service URLs

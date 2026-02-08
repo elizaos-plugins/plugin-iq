@@ -1,10 +1,10 @@
 import type { IAgentRuntime, Memory, Provider, State } from "@elizaos/core";
-import { IQ_SERVICE_NAME } from "../constants";
-import type { IQService } from "../service";
+import { IQ_SERVICE_NAME } from "../typescript/constants";
+import type { IQService } from "../typescript/service";
 
 /**
- * Provider that supplies chatroom context to the agent.
- * Reports all connected chatrooms and recent activity.
+ * Provider that supplies IQ chatroom context to the agent.
+ * When wallet is not configured, tells the agent how to enable IQ chat.
  */
 export const chatroomStateProvider: Provider = {
   name: "chatroomState",
@@ -18,9 +18,9 @@ export const chatroomStateProvider: Provider = {
     
     if (!service) {
       return {
-        data: { available: false },
+        data: { available: false, reason: "wallet_not_configured" },
         values: { iqAvailable: "false" },
-        text: "IQ service is not available.",
+        text: "IQ on-chain chat is not available. To enable it, configure a Solana wallet by setting SOLANA_PRIVATE_KEY in your environment.",
       };
     }
 
@@ -35,13 +35,17 @@ export const chatroomStateProvider: Provider = {
       // Ignore balance fetch errors
     }
 
-    // Get recent messages from default chatroom for context
-    let recentMessages: string[] = [];
-    try {
-      const messages = await service.readMessages(5);
-      recentMessages = messages.map((m) => `[${m.chatroom || defaultChatroom}] ${m.agent}: ${m.content}`);
-    } catch {
-      // Ignore message fetch errors
+    // Get recent messages from each connected chatroom
+    const allRecentMessages: string[] = [];
+    for (const room of connectedChatrooms) {
+      try {
+        const messages = await service.readMessages(3, room);
+        for (const m of messages) {
+          allRecentMessages.push(`[${room}] ${m.agent}: ${m.content}`);
+        }
+      } catch {
+        // Ignore per-room fetch errors
+      }
     }
 
     const data = {
@@ -50,7 +54,7 @@ export const chatroomStateProvider: Provider = {
       defaultChatroom,
       walletAddress,
       balance,
-      recentMessages,
+      recentMessages: allRecentMessages,
     };
 
     const values = {
@@ -61,17 +65,18 @@ export const chatroomStateProvider: Provider = {
       solBalance: balance.toFixed(4),
     };
 
-    const recentContext = recentMessages.length > 0
-      ? `\nRecent messages:\n${recentMessages.join("\n")}`
-      : "";
+    const recentContext = allRecentMessages.length > 0
+      ? `\nRecent messages across channels:\n${allRecentMessages.join("\n")}`
+      : "\nNo recent messages in any channel.";
 
     const text = `
-The agent is connected to IQ, an on-chain chat platform on Solana.
+The agent is connected to IQ on-chain chat (Solana).
 Connected chatrooms: ${connectedChatrooms.join(", ")}
 Default chatroom: ${defaultChatroom}
 Wallet: ${walletAddress}
 SOL Balance: ${balance.toFixed(4)} SOL
-Messages can be sent to any chatroom by specifying the target chatroom name. If no target is specified, messages go to the default chatroom ("${defaultChatroom}").${recentContext}
+
+Messages can be sent to any chatroom by name. Default target: "${defaultChatroom}".${recentContext}
     `.trim();
 
     return { data, values, text };

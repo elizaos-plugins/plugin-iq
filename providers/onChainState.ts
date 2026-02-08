@@ -3,7 +3,8 @@ import { IQ_SERVICE_NAME, URLS } from "../typescript/constants";
 import type { IQService } from "../typescript/service";
 
 /**
- * Provider that supplies on-chain and Moltbook context to the agent
+ * Provider that supplies on-chain and Moltbook context to the agent.
+ * When wallet is not configured, tells the agent how to enable IQ chat.
  */
 export const onChainStateProvider: Provider = {
   name: "onChainState",
@@ -17,11 +18,13 @@ export const onChainStateProvider: Provider = {
 
     if (!service) {
       return {
-        data: { available: false },
+        data: { available: false, reason: "wallet_not_configured" },
         values: { onChainAvailable: "false" },
-        text: "On-chain services are not available.",
+        text: "On-chain services are not available. Set SOLANA_PRIVATE_KEY to enable IQ chat and Moltbook.",
       };
     }
+
+    const connectedChatrooms = service.getConnectedChatrooms();
 
     // Get recent Moltbook posts for context
     let moltbookPosts: string[] = [];
@@ -34,15 +37,12 @@ export const onChainStateProvider: Provider = {
       // Ignore Moltbook fetch errors
     }
 
-    const connectedChatrooms = service.getConnectedChatrooms();
-
     const data = {
       available: true,
       connectedChatrooms,
       moltbookPosts,
       gatewayUrl: URLS.gateway,
       baseUrl: URLS.base,
-      pnlUrl: URLS.pnl,
     };
 
     const values = {
@@ -56,17 +56,11 @@ export const onChainStateProvider: Provider = {
       : "";
 
     const text = `
-On-chain services status:
-- IQ chat: available at ${URLS.base}/chat
-- Connected chatrooms: ${connectedChatrooms.join(", ")}
-- Moltbook: available at ${URLS.moltbook.replace("/api/v1", "")}
-- IQLabs Gateway: ${URLS.gateway}
-- PnL Tracking: ${URLS.pnl}${moltbookContext}
+On-chain services:
+- IQ chat: connected to ${connectedChatrooms.join(", ")}
+- Moltbook: ${URLS.moltbook.replace("/api/v1", "")}${moltbookContext}
 
-The agent can:
-- Send and read on-chain chat messages to any chatroom by name (permanent, uncensorable)
-- Post, browse, and comment on Moltbook
-- Inscribe arbitrary data to Solana
+The agent can send/read messages to any chatroom by name, and interact with Moltbook.
     `.trim();
 
     return { data, values, text };
