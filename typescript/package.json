@@ -52,5 +52,57 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/elizaos/eliza"
+  },
+  "agentConfig": {
+    "pluginParameters": {
+      "IQ_AGENT_NAME": {
+        "type": "string",
+        "description": "Agent display name",
+        "required": false,
+        "sensitive": false
+      },
+      "IQ_DEFAULT_CHATROOM": {
+        "type": "string",
+        "description": "Chat room identifier(s)",
+        "required": false,
+        "sensitive": false
+      },
+      "IQ_CHATROOMS": {
+        "type": "string",
+        "description": "Chat room identifier(s)",
+        "required": false,
+        "sensitive": false
+      },
+      "IQ_GATEWAY_URL": {
+        "type": "string",
+        "description": "Gateway URL",
+        "required": false,
+        "sensitive": false
+      },
+      "SOLANA_PRIVATE_KEY": {
+        "type": "string",
+        "description": "Private key for Solana",
+        "required": true,
+        "sensitive": true
+      },
+      "SOLANA_KEYPAIR_PATH": {
+        "type": "string",
+        "description": "Path to keypair file",
+        "required": false,
+        "sensitive": true
+      },
+      "SOLANA_RPC_URL": {
+        "type": "string",
+        "description": "RPC endpoint URL",
+        "required": false,
+        "sensitive": false
+      },
+      "PNL_API_URL": {
+        "type": "string",
+        "description": "URL for Pnl Api",
+        "required": false,
+        "sensitive": false
+      }
+    }
   }
 }
