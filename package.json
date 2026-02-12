@@ -23,7 +23,7 @@
     "dev": "tsc -p tsconfig.build.json --watch",
     "clean": "rm -rf dist",
     "lint": "biome check --write .",
-    "test": "bun test"
+    "test": "bun test --pass-with-no-tests"
   },
   "dependencies": {
     "@elizaos/core": "next",
