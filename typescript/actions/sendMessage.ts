@@ -1,55 +1,78 @@
-import {
-  type Action,
-  type ActionExample,
-  type HandlerCallback,
-  type IAgentRuntime,
-  type Memory,
-  type State,
+import type {
+  Action,
+  ActionExample,
+  HandlerCallback,
+  IAgentRuntime,
+  Memory,
+  State,
 } from "@elizaos/core";
 import { IQ_SERVICE_NAME } from "../constants";
 import type { IQService } from "../service";
 
 const sendMessageAction: Action = {
   name: "SEND_IQ_MESSAGE",
-  similes: [
-    "POST_IQ",
-    "SEND_ONCHAIN_MESSAGE",
-    "CHAT_IQ",
-    "WRITE_IQ",
-    "SEND_IQ",
-  ],
+  similes: ["POST_IQ", "SEND_ONCHAIN_MESSAGE", "CHAT_IQ", "WRITE_IQ", "SEND_IQ"],
   description:
     "Send a message to an IQ on-chain chatroom. Specify a target chatroom by name, or it defaults to the default chatroom. Messages are permanently stored on Solana.",
-  
-  validate: async (
-    runtime: IAgentRuntime,
-    message: Memory,
-    _state?: State
-  ): Promise<boolean> => {
-    const service = runtime.getService(IQ_SERVICE_NAME) as IQService;
-    if (!service) {
+
+  validate: async (runtime: any, message: any, state?: any, options?: any): Promise<boolean> => {
+    const __avTextRaw = typeof message?.content?.text === "string" ? message.content.text : "";
+    const __avText = __avTextRaw.toLowerCase();
+    const __avKeywords = ["send", "message"];
+    const __avKeywordOk =
+      __avKeywords.length > 0 && __avKeywords.some((kw) => kw.length > 0 && __avText.includes(kw));
+    const __avRegex = /\b(?:send|message)\b/i;
+    const __avRegexOk = __avRegex.test(__avText);
+    const __avSource = String(message?.content?.source ?? message?.source ?? "");
+    const __avExpectedSource = "";
+    const __avSourceOk = __avExpectedSource
+      ? __avSource === __avExpectedSource
+      : Boolean(__avSource || state || runtime?.agentId || runtime?.getService);
+    const __avOptions = options && typeof options === "object" ? options : {};
+    const __avInputOk =
+      __avText.trim().length > 0 ||
+      Object.keys(__avOptions as Record<string, unknown>).length > 0 ||
+      Boolean(message?.content && typeof message.content === "object");
+
+    if (!(__avKeywordOk && __avRegexOk && __avSourceOk && __avInputOk)) {
       return false;
     }
-    
-    const text = message.content?.text?.toLowerCase() || "";
-    return (
-      text.includes("send") ||
-      text.includes("post") ||
-      text.includes("message") ||
-      text.includes("chat") ||
-      text.includes("say") ||
-      text.includes("tell")
-    );
+
+    const __avLegacyValidate = async (
+      runtime: IAgentRuntime,
+      message: Memory,
+      _state?: State
+    ): Promise<boolean> => {
+      const service = runtime.getService(IQ_SERVICE_NAME) as unknown as IQService;
+      if (!service) {
+        return false;
+      }
+
+      const text = message.content?.text?.toLowerCase() || "";
+      return (
+        text.includes("send") ||
+        text.includes("post") ||
+        text.includes("message") ||
+        text.includes("chat") ||
+        text.includes("say") ||
+        text.includes("tell")
+      );
+    };
+    try {
+      return Boolean(await (__avLegacyValidate as any)(runtime, message, state, options));
+    } catch {
+      return false;
+    }
   },
 
   handler: async (
     runtime: IAgentRuntime,
     message: Memory,
-    state?: State,
+    _state?: State,
     options?: Record<string, unknown>,
     callback?: HandlerCallback
   ) => {
-    const service = runtime.getService(IQ_SERVICE_NAME) as IQService;
+    const service = runtime.getService(IQ_SERVICE_NAME) as unknown as IQService;
     if (!service) {
       if (callback) {
         await callback({
@@ -61,9 +84,8 @@ const sendMessageAction: Action = {
     }
 
     // Extract message content
-    const messageContent = options?.content as string || 
-      options?.message as string ||
-      message.content?.text;
+    const messageContent =
+      (options?.content as string) || (options?.message as string) || message.content?.text;
 
     if (!messageContent) {
       if (callback) {
@@ -77,12 +99,13 @@ const sendMessageAction: Action = {
 
     // Resolve target chatroom from options or message metadata
     // channelRef can be a chatroom name, partial name (fuzzy matched), or undefined for default
-    const channelRef = options?.channelRef as string
-      || options?.chatroom as string
-      || options?.channel as string
-      || options?.target as string
-      || (message.content?.metadata as Record<string, string> | undefined)?.chatroom
-      || undefined;
+    const channelRef =
+      (options?.channelRef as string) ||
+      (options?.chatroom as string) ||
+      (options?.channel as string) ||
+      (options?.target as string) ||
+      (message.content?.metadata as Record<string, string> | undefined)?.chatroom ||
+      undefined;
 
     const targetChatroom = channelRef
       ? service.resolveChatroom(channelRef)
@@ -90,7 +113,7 @@ const sendMessageAction: Action = {
 
     try {
       const txSig = await service.sendMessage(messageContent, targetChatroom);
-      
+
       if (callback) {
         await callback({
           text: `Message sent to "${targetChatroom}"! Transaction: ${txSig}`,
@@ -105,7 +128,7 @@ const sendMessageAction: Action = {
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
+
       if (callback) {
         await callback({
           text: `Failed to send message to "${targetChatroom}": ${errorMessage}`,

@@ -1,6 +1,7 @@
 import type { IAgentRuntime, Memory, Provider, State } from "@elizaos/core";
 import { IQ_SERVICE_NAME } from "../typescript/constants";
 import type { IQService } from "../typescript/service";
+import { validateActionKeywords, validateActionRegex } from "@elizaos/core";
 
 /**
  * Provider that supplies IQ chatroom context to the agent.
@@ -9,11 +10,38 @@ import type { IQService } from "../typescript/service";
 export const chatroomStateProvider: Provider = {
   name: "chatroomState",
   
-  get: async (
+    dynamic: true,
+  relevanceKeywords: [
+    "chatroomstate",
+    "chatroomstateprovider",
+    "plugin",
+    "status",
+    "state",
+    "context",
+    "info",
+    "details",
+    "chat",
+    "conversation",
+    "agent",
+    "room",
+    "channel",
+    "user",
+  ],
+get: async (
     runtime: IAgentRuntime,
     message: Memory,
     state?: State
-  ): Promise<{ data: Record<string, unknown>; values: Record<string, string>; text: string }> => {
+  ): Promise<{ data: Record<string, unknown>; values: Record<string, string>; text: string }> => {  const __providerKeywords = ["chatroomstate", "chatroomstateprovider", "plugin", "status", "state", "context", "info", "details", "chat", "conversation", "agent", "room", "channel", "user"];
+  const __providerRegex = new RegExp(`\\b(${__providerKeywords.join("|")})\\b`, "i");
+  const __recentMessages = state?.recentMessagesData || [];
+  const __isRelevant =
+    validateActionKeywords(message, __recentMessages, __providerKeywords) ||
+    validateActionRegex(message, __recentMessages, __providerRegex);
+  if (!__isRelevant) {
+    return { text: "" };
+  }
+
+
     const service = runtime.getService(IQ_SERVICE_NAME) as IQService | undefined;
     
     if (!service) {

@@ -21,7 +21,7 @@ export const DEFAULT_CHATROOM = "clawbal";
 /**
  * Default chatrooms to connect to and poll on startup
  */
-export const DEFAULT_CHATROOMS = ["clawbal", "milaidy"];
+export const DEFAULT_CHATROOMS = ["clawbal", "milady"];
 
 /**
  * External service URLs

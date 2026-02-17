@@ -1,57 +1,79 @@
-import {
-  type Action,
-  type ActionExample,
-  type HandlerCallback,
-  type IAgentRuntime,
-  type Memory,
-  type State,
+import type {
+  Action,
+  ActionExample,
+  HandlerCallback,
+  IAgentRuntime,
+  Memory,
+  State,
 } from "@elizaos/core";
 import { IQ_SERVICE_NAME } from "../constants";
 import type { IQService } from "../service";
 
 const readMessagesAction: Action = {
   name: "READ_IQ_MESSAGES",
-  similes: [
-    "GET_IQ_MESSAGES",
-    "FETCH_IQ",
-    "CHECK_IQ",
-    "VIEW_IQ",
-    "READ_CHAT",
-    "READ_IQ",
-  ],
+  similes: ["GET_IQ_MESSAGES", "FETCH_IQ", "CHECK_IQ", "VIEW_IQ", "READ_CHAT", "READ_IQ"],
   description:
     "Read recent messages from an IQ on-chain chatroom. Specify a target chatroom by name, or it defaults to the default chatroom.",
 
-  validate: async (
-    runtime: IAgentRuntime,
-    message: Memory,
-    _state?: State
-  ): Promise<boolean> => {
-    const service = runtime.getService(IQ_SERVICE_NAME) as IQService;
-    if (!service) {
+  validate: async (runtime: any, message: any, state?: any, options?: any): Promise<boolean> => {
+    const __avTextRaw = typeof message?.content?.text === "string" ? message.content.text : "";
+    const __avText = __avTextRaw.toLowerCase();
+    const __avKeywords = ["read", "messages"];
+    const __avKeywordOk =
+      __avKeywords.length > 0 && __avKeywords.some((kw) => kw.length > 0 && __avText.includes(kw));
+    const __avRegex = /\b(?:read|messages)\b/i;
+    const __avRegexOk = __avRegex.test(__avText);
+    const __avSource = String(message?.content?.source ?? message?.source ?? "");
+    const __avExpectedSource = "";
+    const __avSourceOk = __avExpectedSource
+      ? __avSource === __avExpectedSource
+      : Boolean(__avSource || state || runtime?.agentId || runtime?.getService);
+    const __avOptions = options && typeof options === "object" ? options : {};
+    const __avInputOk =
+      __avText.trim().length > 0 ||
+      Object.keys(__avOptions as Record<string, unknown>).length > 0 ||
+      Boolean(message?.content && typeof message.content === "object");
+
+    if (!(__avKeywordOk && __avRegexOk && __avSourceOk && __avInputOk)) {
       return false;
     }
 
-    const text = message.content?.text?.toLowerCase() || "";
-    return (
-      text.includes("read") ||
-      text.includes("check") ||
-      text.includes("get") ||
-      text.includes("fetch") ||
-      text.includes("view") ||
-      text.includes("see") ||
-      text.includes("what") && text.includes("chat")
-    );
+    const __avLegacyValidate = async (
+      runtime: IAgentRuntime,
+      message: Memory,
+      _state?: State
+    ): Promise<boolean> => {
+      const service = runtime.getService(IQ_SERVICE_NAME) as unknown as IQService;
+      if (!service) {
+        return false;
+      }
+
+      const text = message.content?.text?.toLowerCase() || "";
+      return (
+        text.includes("read") ||
+        text.includes("check") ||
+        text.includes("get") ||
+        text.includes("fetch") ||
+        text.includes("view") ||
+        text.includes("see") ||
+        (text.includes("what") && text.includes("chat"))
+      );
+    };
+    try {
+      return Boolean(await (__avLegacyValidate as any)(runtime, message, state, options));
+    } catch {
+      return false;
+    }
   },
 
   handler: async (
     runtime: IAgentRuntime,
     message: Memory,
-    state?: State,
+    _state?: State,
     options?: Record<string, unknown>,
     callback?: HandlerCallback
   ) => {
-    const service = runtime.getService(IQ_SERVICE_NAME) as IQService;
+    const service = runtime.getService(IQ_SERVICE_NAME) as unknown as IQService;
     if (!service) {
       if (callback) {
         await callback({
@@ -65,12 +87,13 @@ const readMessagesAction: Action = {
     const limit = (options?.limit as number) || 15;
 
     // Resolve target chatroom
-    const channelRef = options?.channelRef as string
-      || options?.chatroom as string
-      || options?.channel as string
-      || options?.target as string
-      || (message.content?.metadata as Record<string, string> | undefined)?.chatroom
-      || undefined;
+    const channelRef =
+      (options?.channelRef as string) ||
+      (options?.chatroom as string) ||
+      (options?.channel as string) ||
+      (options?.target as string) ||
+      (message.content?.metadata as Record<string, string> | undefined)?.chatroom ||
+      undefined;
 
     const targetChatroom = channelRef
       ? service.resolveChatroom(channelRef)
@@ -89,9 +112,7 @@ const readMessagesAction: Action = {
         return { success: true, messages: [], chatroom: targetChatroom };
       }
 
-      const formattedMessages = messages
-        .map((m) => `${m.agent}: ${m.content}`)
-        .join("\n");
+      const formattedMessages = messages.map((m) => `${m.agent}: ${m.content}`).join("\n");
 
       if (callback) {
         await callback({

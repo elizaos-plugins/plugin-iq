@@ -1,5 +1,5 @@
 {
-  "name": "@elizaos/plugin-iq",
+  "name": "@elizaos/plugin-iq-root",
   "version": "1.0.1",
   "description": "IQ on-chain chat plugin for Eliza agents on Solana. Send and receive messages across any channel, post on Moltbook, and inscribe data permanently.",
   "type": "module",

@@ -1,20 +1,15 @@
-import type { IAgentRuntime, Memory, Provider, State } from "@elizaos/core";
-import { IQ_SERVICE_NAME, URLS } from "../typescript/constants";
-import type { IQService } from "../typescript/service";
+import type { IAgentRuntime, Memory, Provider, ProviderResult, State } from "@elizaos/core";
+import { IQ_SERVICE_NAME, URLS } from "../constants";
+import type { IQService } from "../service";
 
 /**
  * Provider that supplies on-chain and Moltbook context to the agent.
- * When wallet is not configured, tells the agent how to enable IQ chat.
  */
 export const onChainStateProvider: Provider = {
   name: "onChainState",
-
-  get: async (
-    runtime: IAgentRuntime,
-    message: Memory,
-    state?: State
-  ): Promise<{ data: Record<string, unknown>; values: Record<string, string>; text: string }> => {
-    const service = runtime.getService(IQ_SERVICE_NAME) as IQService | undefined;
+  dynamic: true,
+  get: async (runtime: IAgentRuntime, _message: Memory, _state: State): Promise<ProviderResult> => {
+    const service = runtime.getService(IQ_SERVICE_NAME) as unknown as IQService | undefined;
 
     if (!service) {
       return {
@@ -26,44 +21,40 @@ export const onChainStateProvider: Provider = {
 
     const connectedChatrooms = service.getConnectedChatrooms();
 
-    // Get recent Moltbook posts for context
     let moltbookPosts: string[] = [];
     try {
       const posts = await service.moltbookBrowse(undefined, "hot");
-      moltbookPosts = posts.slice(0, 5).map(
-        (p) => `[${p.submolt?.name || "general"}] ${p.title} (${p.upvotes || 0} votes)`
-      );
+      moltbookPosts = posts
+        .slice(0, 5)
+        .map((p) => `[${p.submolt?.name || "general"}] ${p.title} (${p.upvotes || 0} votes)`);
     } catch {
       // Ignore Moltbook fetch errors
     }
 
-    const data = {
-      available: true,
-      connectedChatrooms,
-      moltbookPosts,
-      gatewayUrl: URLS.gateway,
-      baseUrl: URLS.base,
-    };
+    const moltbookContext =
+      moltbookPosts.length > 0 ? `\nTrending on Moltbook:\n${moltbookPosts.join("\n")}` : "";
 
-    const values = {
-      onChainAvailable: "true",
-      moltbookHasActivity: moltbookPosts.length > 0 ? "true" : "false",
-      chatroomCount: String(connectedChatrooms.length),
-    };
-
-    const moltbookContext = moltbookPosts.length > 0
-      ? `\nTrending on Moltbook:\n${moltbookPosts.join("\n")}`
-      : "";
-
-    const text = `
+    return {
+      data: {
+        available: true,
+        connectedChatrooms,
+        moltbookPosts,
+        gatewayUrl: URLS.gateway,
+        baseUrl: URLS.base,
+      },
+      values: {
+        onChainAvailable: "true",
+        moltbookHasActivity: moltbookPosts.length > 0 ? "true" : "false",
+        chatroomCount: String(connectedChatrooms.length),
+      },
+      text: `
 On-chain services:
 - IQ chat: connected to ${connectedChatrooms.join(", ")}
 - Moltbook: ${URLS.moltbook.replace("/api/v1", "")}${moltbookContext}
 
 The agent can send/read messages to any chatroom by name, and interact with Moltbook.
-    `.trim();
-
-    return { data, values, text };
+      `.trim(),
+    };
   },
 };
 

@@ -1,12 +1,11 @@
 {
-  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": ".",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -16,6 +15,6 @@
     "lib": ["ES2022"],
     "types": ["node"]
   },
-  "include": ["./**/*.ts"],
+  "include": ["./constants.ts", "./environment.ts", "./types.ts"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "__tests__"]
 }

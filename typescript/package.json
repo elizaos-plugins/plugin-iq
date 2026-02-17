@@ -19,17 +19,20 @@
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsc -p tsconfig.build.json --watch",
     "clean": "rm -rf dist",
-    "lint": "biome check --write .",
-    "test": "bun test --pass-with-no-tests"
+    "lint": "bunx @biomejs/biome check --write --unsafe .",
+    "lint:check": "bunx @biomejs/biome check . --no-errors-on-unmatched",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+    "test": "npx -y vitest@4.0.18 run --config vitest.config.ts --passWithNoTests"
   },
   "dependencies": {
     "@elizaos/core": "next",
     "@solana/web3.js": "^1.95.5",
     "bs58": "^6.0.0",
-    "iqlabs-sdk": "link:../iqlabs-solana-sdk",
+    "@iqlabs-official/solana-sdk": "^0.1.0",
     "nanoid": "^5.0.7"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.2",
     "@types/node": "^22.10.5",
     "typescript": "^5.7.2"
   },

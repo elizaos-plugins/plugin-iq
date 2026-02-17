@@ -21,7 +21,31 @@ const getWalletInfoAction: Action = {
   description:
     "Get wallet information including address and SOL balance for the IQ agent.",
 
-  validate: async (
+        validate: async (runtime: any, message: any, state?: any, options?: any): Promise<boolean> => {
+    	const __avTextRaw = typeof message?.content?.text === 'string' ? message.content.text : '';
+    	const __avText = __avTextRaw.toLowerCase();
+    	const __avKeywords = ['get', 'wallet', 'info'];
+    	const __avKeywordOk =
+    		__avKeywords.length > 0 &&
+    		__avKeywords.some((kw) => kw.length > 0 && __avText.includes(kw));
+    	const __avRegex = new RegExp('\\b(?:get|wallet|info)\\b', 'i');
+    	const __avRegexOk = __avRegex.test(__avText);
+    	const __avSource = String(message?.content?.source ?? message?.source ?? '');
+    	const __avExpectedSource = '';
+    	const __avSourceOk = __avExpectedSource
+    		? __avSource === __avExpectedSource
+    		: Boolean(__avSource || state || runtime?.agentId || runtime?.getService);
+    	const __avOptions = options && typeof options === 'object' ? options : {};
+    	const __avInputOk =
+    		__avText.trim().length > 0 ||
+    		Object.keys(__avOptions as Record<string, unknown>).length > 0 ||
+    		Boolean(message?.content && typeof message.content === 'object');
+
+    	if (!(__avKeywordOk && __avRegexOk && __avSourceOk && __avInputOk)) {
+    		return false;
+    	}
+
+    	const __avLegacyValidate = async (
     runtime: IAgentRuntime,
     message: Memory,
     _state?: State
@@ -38,7 +62,13 @@ const getWalletInfoAction: Action = {
       text.includes("sol") ||
       text.includes("address")
     );
-  },
+  };
+    	try {
+    		return Boolean(await (__avLegacyValidate as any)(runtime, message, state, options));
+    	} catch {
+    		return false;
+    	}
+    },
 
   handler: async (
     runtime: IAgentRuntime,

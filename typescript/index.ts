@@ -1,23 +1,20 @@
 import { type IAgentRuntime, logger, type Plugin } from "@elizaos/core";
-
-// Service
-import { IQService } from "./service";
-
+import getWalletInfoAction from "./actions/getWalletInfo";
+import inscribeDataAction from "./actions/inscribeData";
+import moltbookBrowseAction from "./actions/moltbookBrowse";
+import moltbookCommentAction from "./actions/moltbookComment";
+import moltbookPostAction from "./actions/moltbookPost";
+import readMessagesAction from "./actions/readMessages";
 // Actions
-import sendMessageAction from "../actions/sendMessage";
-import readMessagesAction from "../actions/readMessages";
-import moltbookPostAction from "../actions/moltbookPost";
-import moltbookBrowseAction from "../actions/moltbookBrowse";
-import moltbookCommentAction from "../actions/moltbookComment";
-import inscribeDataAction from "../actions/inscribeData";
-import getWalletInfoAction from "../actions/getWalletInfo";
+import sendMessageAction from "./actions/sendMessage";
+// Constants and types
+import { DEFAULT_CHATROOM, DEFAULT_CHATROOMS, URLS } from "./constants";
 
 // Providers
-import { chatroomStateProvider } from "../providers/chatroomState";
-import { onChainStateProvider } from "../providers/onChainState";
-
-// Constants and types
-import { IQ_SERVICE_NAME, URLS, DEFAULT_CHATROOM, DEFAULT_CHATROOMS } from "./constants";
+import { chatroomStateProvider } from "./providers/chatroomState";
+import { onChainStateProvider } from "./providers/onChainState";
+// Service
+import { IQService } from "./service";
 
 /**
  * IQ Plugin
@@ -37,9 +34,9 @@ const iqPlugin: Plugin = {
   name: "iq",
   description:
     "IQ on-chain chat plugin for Solana. Connects to all chatrooms simultaneously. Send/read messages to any channel by name, post on Moltbook, and inscribe data permanently.",
-  
+
   services: [IQService],
-  
+
   actions: [
     sendMessageAction,
     readMessagesAction,
@@ -49,7 +46,7 @@ const iqPlugin: Plugin = {
     inscribeDataAction,
     getWalletInfoAction,
   ],
-  
+
   providers: [chatroomStateProvider, onChainStateProvider],
 
   init: async (_config: Record<string, string>, runtime: IAgentRuntime) => {
@@ -84,9 +81,7 @@ const iqPlugin: Plugin = {
     logger.info("=".repeat(50));
 
     if (!hasKeypair) {
-      logger.warn(
-        "No Solana keypair provided - IQ plugin will be limited to read-only mode"
-      );
+      logger.warn("No Solana keypair provided - IQ plugin will be limited to read-only mode");
       logger.warn(
         "To enable full functionality, set SOLANA_PRIVATE_KEY or SOLANA_KEYPAIR_PATH in your .env file"
       );
@@ -96,24 +91,27 @@ const iqPlugin: Plugin = {
 
 export default iqPlugin;
 
+// Export constants
+export {
+  CHATROOM_PREFIX,
+  DB_ROOT_NAME,
+  DEFAULT_CHATROOM,
+  DEFAULT_CHATROOMS,
+  IQ_SERVICE_NAME,
+  URLS,
+} from "./constants";
 // Export service and constants
 export { IQService } from "./service";
-export { IQ_SERVICE_NAME } from "./constants";
-export type { IIQService } from "./types";
-
 // Export types
 export type {
-  IQSettings,
-  IQMessage,
+  IIQService,
   IQChatroom,
-  MoltbookPost,
-  MoltbookComment,
   IQEventType,
+  IQMessage,
   IQMessagePayload,
+  IQSettings,
+  MoltbookComment,
+  MoltbookPost,
 } from "./types";
-
 // Export event types
 export { IQEventTypes } from "./types";
-
-// Export constants
-export { URLS, DEFAULT_CHATROOM, DEFAULT_CHATROOMS, DB_ROOT_NAME, CHATROOM_PREFIX } from "./constants";

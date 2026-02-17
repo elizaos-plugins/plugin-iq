@@ -14,10 +14,8 @@ export function getIQSettings(runtime: IAgentRuntime): IQSettings {
     }
 
     // Check character settings
-    const characterSettings = runtime.character?.settings?.iq as
-      | Record<string, string>
-      | undefined;
-    if (characterSettings && characterSettings[key]) {
+    const characterSettings = runtime.character?.settings?.iq as Record<string, string> | undefined;
+    if (characterSettings?.[key]) {
       return characterSettings[key];
     }
 
@@ -30,7 +28,10 @@ export function getIQSettings(runtime: IAgentRuntime): IQSettings {
   // Parse chatrooms list from comma-separated string, or use defaults
   const chatroomsStr = getSetting("IQ_CHATROOMS");
   const chatrooms = chatroomsStr
-    ? chatroomsStr.split(",").map((s) => s.trim()).filter(Boolean)
+    ? chatroomsStr
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
     : DEFAULT_CHATROOMS;
 
   const defaultChatroom = getSetting("IQ_DEFAULT_CHATROOM", DEFAULT_CHATROOM) ?? DEFAULT_CHATROOM;

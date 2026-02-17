@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+import * as fs from "node:fs";
 import {
   ChannelType,
   type Character,
@@ -10,23 +12,21 @@ import {
   type TargetInfo,
   type UUID,
 } from "@elizaos/core";
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { createHash } from "crypto";
-import { nanoid } from "nanoid";
-import * as fs from "fs";
-import bs58 from "bs58";
 import iqlabs from "@iqlabs-official/solana-sdk";
+import { Connection, Keypair, type PublicKey } from "@solana/web3.js";
+import bs58 from "bs58";
+import { nanoid } from "nanoid";
 
-import { IQ_SERVICE_NAME, DB_ROOT_NAME, CHATROOM_PREFIX, URLS, MESSAGE_LIMITS } from "./constants";
+import { CHATROOM_PREFIX, DB_ROOT_NAME, IQ_SERVICE_NAME, MESSAGE_LIMITS, URLS } from "./constants";
 import { getIQSettings } from "./environment";
 import {
-  type IQSettings,
-  type IQMessage,
-  type IQChatroom,
-  type MoltbookPost,
-  type MoltbookComment,
   type IIQService,
+  type IQChatroom,
   IQEventTypes,
+  type IQMessage,
+  type IQSettings,
+  type MoltbookComment,
+  type MoltbookPost,
 } from "./types";
 
 /**
@@ -134,7 +134,9 @@ export class IQService extends Service implements IIQService {
       try {
         balance = await this.getBalance();
         if (balance < MESSAGE_LIMITS.minSolBalance) {
-          this.runtime.logger.warn(`Low SOL balance (${balance} SOL). Need at least ${MESSAGE_LIMITS.minSolBalance} SOL.`);
+          this.runtime.logger.warn(
+            `Low SOL balance (${balance} SOL). Need at least ${MESSAGE_LIMITS.minSolBalance} SOL.`
+          );
         }
       } catch (e) {
         this.runtime.logger.warn(`Could not fetch balance: ${e}`);
@@ -142,7 +144,7 @@ export class IQService extends Service implements IIQService {
 
       this.runtime.logger.info(`IQ service started for ${this.settings.agentName}`);
       this.runtime.logger.info(`Wallet: ${this.getWalletAddress()}`);
-      this.runtime.logger.info(`Balance: ${balance > 0 ? balance + " SOL" : "(unknown)"}`);
+      this.runtime.logger.info(`Balance: ${balance > 0 ? `${balance} SOL` : "(unknown)"}`);
       this.runtime.logger.info(`Connected chatrooms: ${this.getConnectedChatrooms().join(", ")}`);
 
       // Register send handler
@@ -284,7 +286,10 @@ export class IQService extends Service implements IIQService {
     }
   }
 
-  async readMessages(limit = MESSAGE_LIMITS.defaultReadLimit, chatroom?: string): Promise<IQMessage[]> {
+  async readMessages(
+    limit = MESSAGE_LIMITS.defaultReadLimit,
+    chatroom?: string
+  ): Promise<IQMessage[]> {
     const targetName = chatroom ? this.resolveChatroom(chatroom) : this.settings.defaultChatroom;
     const targetChatroom = this.ensureChatroom(targetName);
 
@@ -307,7 +312,10 @@ export class IQService extends Service implements IIQService {
         const response = await fetch(gatewayUrl);
         if (response.ok) {
           const data = await response.json();
-          return ((data.rows || data || []) as IQMessage[]).map((m) => ({ ...m, chatroom: targetName }));
+          return ((data.rows || data || []) as IQMessage[]).map((m) => ({
+            ...m,
+            chatroom: targetName,
+          }));
         }
       } catch (error) {
         this.runtime.logger.debug(`Gateway read failed for ${targetName}: ${error}`);
@@ -334,12 +342,19 @@ export class IQService extends Service implements IIQService {
     try {
       const response = await fetch(`${URLS.moltbook}/posts`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${this.settings.moltbookToken}`, "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${this.settings.moltbookToken}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ submolt, title, content }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || JSON.stringify(data));
-      this.runtime.emitEvent(IQEventTypes.MOLTBOOK_POST_CREATED as string, { postId: data.post?.id, submolt, title });
+      this.runtime.emitEvent(IQEventTypes.MOLTBOOK_POST_CREATED as string, {
+        postId: data.post?.id,
+        submolt,
+        title,
+      });
       return data.post?.id || "success";
     } catch (error) {
       this.runtime.logger.error(`Failed to post to Moltbook: ${error}`);
@@ -366,12 +381,18 @@ export class IQService extends Service implements IIQService {
     try {
       const response = await fetch(`${URLS.moltbook}/posts/${postId}/comments`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${this.settings.moltbookToken}`, "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${this.settings.moltbookToken}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ content }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(JSON.stringify(data));
-      this.runtime.emitEvent(IQEventTypes.MOLTBOOK_COMMENT_CREATED as string, { commentId: data.id, postId });
+      this.runtime.emitEvent(IQEventTypes.MOLTBOOK_COMMENT_CREATED as string, {
+        commentId: data.id,
+        postId,
+      });
       return data.id || "success";
     } catch (error) {
       this.runtime.logger.error(`Failed to comment on Moltbook: ${error}`);
@@ -384,7 +405,10 @@ export class IQService extends Service implements IIQService {
     try {
       const response = await fetch(`${URLS.moltbook}/posts/${postId}/comments`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${this.settings.moltbookToken}`, "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${this.settings.moltbookToken}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ content, parent_id: parentId }),
       });
       const data = await response.json();
@@ -396,12 +420,17 @@ export class IQService extends Service implements IIQService {
     }
   }
 
-  async moltbookReadPost(postId: string): Promise<{ post: MoltbookPost; comments: MoltbookComment[] }> {
+  async moltbookReadPost(
+    postId: string
+  ): Promise<{ post: MoltbookPost; comments: MoltbookComment[] }> {
     try {
       const response = await fetch(`${URLS.moltbook}/posts/${postId}`);
       const data = await response.json();
       if (!data.post) throw new Error("Post not found");
-      return { post: data.post as MoltbookPost, comments: (data.comments || []) as MoltbookComment[] };
+      return {
+        post: data.post as MoltbookPost,
+        comments: (data.comments || []) as MoltbookComment[],
+      };
     } catch (error) {
       this.runtime.logger.error(`Failed to read Moltbook post: ${error}`);
       throw error;
@@ -416,7 +445,13 @@ export class IQService extends Service implements IIQService {
     }
     try {
       const tableSeed = sha256(table);
-      const txSig = await iqlabs.writer.writeRow(this.connection, this.keypair, this.dbRootId, tableSeed, data);
+      const txSig = await iqlabs.writer.writeRow(
+        this.connection,
+        this.keypair,
+        this.dbRootId,
+        tableSeed,
+        data
+      );
       this.runtime.emitEvent(IQEventTypes.DATA_INSCRIBED as string, { table, txSig });
       return txSig;
     } catch (error) {
@@ -427,7 +462,11 @@ export class IQService extends Service implements IIQService {
 
   // ==================== INTERNAL ====================
 
-  private async handleSendMessage(runtime: IAgentRuntime, target: TargetInfo, content: Content): Promise<void> {
+  private async handleSendMessage(
+    _runtime: IAgentRuntime,
+    target: TargetInfo,
+    content: Content
+  ): Promise<void> {
     if (content.text) {
       await this.sendMessage(content.text, target.channelId ?? undefined);
     }
@@ -441,7 +480,9 @@ export class IQService extends Service implements IIQService {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userWallet: this.keypair.publicKey.toBase58(), message }),
       });
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   // ==================== MESSAGE POLLING ====================

@@ -1,6 +1,6 @@
 /**
  * End-to-end test for IQ plugin
- * Tests send + receive on both "clawbal" and "milaidy" channels
+ * Tests send + receive on both "clawbal" and "milady" channels
  *
  * Usage: SOLANA_PRIVATE_KEY=... npx tsx test-iq.ts
  */
@@ -16,7 +16,7 @@ import * as fs from "fs";
 const SOLANA_PRIVATE_KEY = process.env.SOLANA_PRIVATE_KEY;
 const AGENT_NAME = process.env.IQ_AGENT_NAME || "TestAgent";
 const RPC_URL = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
-const CHATROOMS = ["clawbal", "milaidy"];
+const CHATROOMS = ["clawbal", "milady"];
 const DB_ROOT_NAME = "clawbal";
 const CHATROOM_PREFIX = "chatroom:";
 
@@ -152,7 +152,7 @@ async function testChatroom(
 
 async function main() {
   console.log("=".repeat(60));
-  console.log("IQ Plugin E2E Test - clawbal + milaidy channels");
+  console.log("IQ Plugin E2E Test - clawbal + milady channels");
   console.log("=".repeat(60));
   console.log("");
 

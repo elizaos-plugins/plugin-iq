@@ -1,10 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "declaration": true,
-    "declarationMap": true
-  },
   "include": ["./constants.ts", "./environment.ts", "./types.ts"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "__tests__"]
 }
