@@ -11,13 +11,7 @@
       "types": "./index.ts"
     }
   },
-  "files": [
-    "*.ts",
-    "actions/",
-    "providers/",
-    "typescript/",
-    "README.md"
-  ],
+  "files": ["index.ts", "typescript/", "README.md"],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsc -p tsconfig.build.json --watch",
